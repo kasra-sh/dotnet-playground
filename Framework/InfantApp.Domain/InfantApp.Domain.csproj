@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Infant.Core\Infant.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="InfantApp.Domain.csproj.DotSettings" />
+    </ItemGroup>
+
+</Project>
