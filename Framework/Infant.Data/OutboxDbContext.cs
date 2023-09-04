@@ -2,6 +2,7 @@
 using Infant.Core.Models.Ddd;
 using Infant.Core.Models.Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ public abstract class OutboxDbContext : DbContext
     public OutboxDbContext() : base()
     {
     }
+
     public OutboxDbContext(DbContextOptions dbContextOptions) : base(options: dbContextOptions)
     {
     }
@@ -32,7 +34,26 @@ public abstract class OutboxDbContext : DbContext
     {
         try
         {
-            SoftDeleteEntities();
+            ConfigureEntries<ISoftDeletable>(
+                e =>
+                {
+                    e.Entity.IsDeleted = true;
+                    e.State = EntityState.Modified;
+                },
+                EntityState.Deleted
+            );
+            
+            var utcNow = DateTime.UtcNow;
+            
+            ConfigureEntries<IHasCreatedOn>(
+                e => e.Entity.CreatedOn = utcNow,
+                EntityState.Added
+            );
+            ConfigureEntries<IHasUpdatedOn>(
+                e => e.Entity.UpdatedOn = utcNow,
+                EntityState.Modified
+            );
+            
             var result = await base.SaveChangesAsync(cancellationToken);
             await SendOutboxEntityEvents();
             return result;
@@ -48,26 +69,22 @@ public abstract class OutboxDbContext : DbContext
     {
         return SaveChangesAsync().ConfigureAwait(false).GetAwaiter().GetResult();
     }
-
-    private void SoftDeleteEntities()
+    
+    private void ConfigureEntries<T>(Action<EntityEntry<T>> action, params EntityState[] states) where T : class
     {
-        var softDeleteEntries = ChangeTracker.Entries<ISoftDeletable>();
-        foreach (var softDeleteEntry in softDeleteEntries)
+        var auditEntries = ChangeTracker.Entries<T>();
+        foreach (var auditEntry in auditEntries)
         {
-            if (softDeleteEntry.State == EntityState.Deleted)
+            if (states.Length == 0 || states.Contains(auditEntry.State))
             {
-                if (!softDeleteEntry.Entity.IsDeleted)
-                {
-                    softDeleteEntry.Entity.IsDeleted = true;
-                    softDeleteEntry.State = EntityState.Modified;
-                }
+                action.Invoke(auditEntry);
             }
         }
     }
 
     private async Task SendOutboxEntityEvents()
     {
-        var outboxEntries = ChangeTracker.Entries<IOutboxEntity>();
+        var outboxEntries = ChangeTracker.Entries<IOutBoxObject>();
         var allLocalEvents = new List<object>();
         var allDistributedEvents = new List<object>();
         foreach (var entityEntry in outboxEntries)
@@ -79,9 +96,23 @@ public abstract class OutboxDbContext : DbContext
             entityEntry.Entity.ClearDistributedEvents();
         }
 
-        await Task.WhenAll(
-            this.GetService<ILocalEventBus>().PublishMessagesAsync(allLocalEvents),
-            this.GetService<IDistributedEventBus>().PublishMessagesAsync(allDistributedEvents)
-        );
+        var serviceProvider = this.GetService<IServiceProvider>();
+
+        var tasks = new List<Task>(2);
+
+        var localEventBus = serviceProvider.GetService<ILocalEventBus>();
+        var distributedEventBus = serviceProvider.GetService<IDistributedEventBus>();
+
+        if (localEventBus is not null)
+        {
+            tasks.Add(localEventBus.PublishMessagesAsync(allLocalEvents));
+        }
+
+        if (distributedEventBus is not null)
+        {
+            tasks.Add(distributedEventBus.PublishMessagesAsync(allDistributedEvents));
+        }
+
+        await Task.WhenAll(tasks);
     }
 }
