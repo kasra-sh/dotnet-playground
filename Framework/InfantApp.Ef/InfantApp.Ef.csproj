@@ -17,6 +17,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Infant.Core\Infant.Core.csproj" />
       <ProjectReference Include="..\Infant.Data\Infant.Data.csproj" />
+      <ProjectReference Include="..\InfantApp.Domain\InfantApp.Domain.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,12 +1,14 @@
 ﻿using Infant.Core.Models.Ddd;
 using Infant.Data;
+using InfantApp.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace InfantApp.Ef;
 
-public class TestDbContext: OutboxDbContext
+public class InfantDbContext: OutboxDbContext
 {
-    public TestDbContext(DbContextOptions options): base(options)
+    // private DbSet<Product> Products;
+    public InfantDbContext(DbContextOptions options): base(options)
     {
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -16,6 +18,8 @@ public class TestDbContext: OutboxDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // modelBuilder.Entity<Product>()
+            // .HasKey(p => p.Id);
         base.OnModelCreating(modelBuilder);
     }
     
