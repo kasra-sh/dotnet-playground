@@ -1,8 +1,9 @@
+using Infant.Core.DI;
 using Infant.Core.Models.Ddd;
 
 namespace Infant.Core.Events;
 
-public interface ILocalEventBus
+public interface ILocalEventBus: ISingletonDependency
 {
     Task PublishMessageAsync<T>(T eventObject);
     Task PublishMessagesAsync<T>(IEnumerable<T> eventObject);
