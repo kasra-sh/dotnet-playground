@@ -3,7 +3,7 @@ namespace Infant.Core.Models.Entity;
 public abstract class FullAuditedEntity<TKey> : IEntity<TKey>, ISoftDeletable, ICreationAudited, IModificationAudited
     where TKey : struct
 {
-    public DateTime UpdatedOn { get; set; }
+    public DateTime? UpdatedOn { get; set; }
     public Guid? UpdaterId { get; set; }
     public bool IsDeleted { get; set; }
     public TKey Id { get; set; }
@@ -15,9 +15,9 @@ public interface IFullAudited : ISoftDeletable, ICreationAudited, IModificationA
 {
 }
 
-public abstract class FullAuditedEntity : IFullAudited
+public abstract class FullAuditedObject : IFullAudited
 {
-    public DateTime UpdatedOn { get; set; }
+    public DateTime? UpdatedOn { get; set; }
     public Guid? UpdaterId { get; set; }
     public bool IsDeleted { get; set; }
     public DateTime CreatedOn { get; set; }
@@ -62,7 +62,7 @@ public interface IMayHaveUpdater
 
 public interface IHasUpdatedOn
 {
-    public DateTime UpdatedOn { get; set; }
+    public DateTime? UpdatedOn { get; set; }
 }
 
 public interface IMayHaveCreator

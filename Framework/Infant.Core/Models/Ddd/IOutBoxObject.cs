@@ -1,6 +1,6 @@
 namespace Infant.Core.Models.Ddd;
 
-public interface IOutboxEntity
+public interface IOutBoxObject
 {
     ICollection<object> GetLocalEvents();
     ICollection<object> GetDistributedEvents();
