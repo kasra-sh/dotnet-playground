@@ -12,7 +12,7 @@ var webAppBuilder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-webAppBuilder.Services.AddDbContext<TestDbContext>(options =>
+webAppBuilder.Services.AddDbContext<InfantDbContext>(options =>
 {
     options.UseSqlServer(webAppBuilder.Configuration.GetConnectionString("InfantDb"));
     options.AddInterceptors();
@@ -25,7 +25,7 @@ var app = webAppBuilder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider
-        .GetRequiredService<TestDbContext>();
+        .GetRequiredService<InfantDbContext>();
     
     // Here is the migration executed
     dbContext.Database.EnsureDeleted();
