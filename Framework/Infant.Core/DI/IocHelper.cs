@@ -32,19 +32,19 @@ public static class IocHelper
         foreach (var dependencyType in dependencyTypes)
         {
             var lifetime = DependencyLifetimeMapping[dependencyType];
-            var all = new AssemblyScanner(assembly).FindTypesByInterface(dependencyType);
+            var typesWithDependencyInterface = new AssemblyScanner(assembly).FindTypesByInterface(dependencyType);
 
-            var baseTypes = all.Where(t => IsNonConcreteClassType(t, dependencyType)).ToList();
+            var implementationTypes = typesWithDependencyInterface.Where(IsConcreteClassType).ToList();
 
-            var implementationTypes = all.Where(IsConcreteClassType).ToList();
+            var depTypes = new List<Type>(8);
 
             foreach (var implementation in implementationTypes)
             {
-                // register concrete class itself
                 var registrationBuilder = containerBuilder.RegisterType(implementation).SetAutofacLifetime(lifetime);
-                var depTypes = new List<Type>(8);
-
-                depTypes.AddRange(baseTypes.Where(nc => implementation.IsAssignableTo(nc)).ToArray());
+                depTypes.Clear();
+                depTypes.AddRange(
+                    implementation.GetInterfaces().Where(i => i != dependencyType && i.IsAssignableTo(dependencyType))
+                );
 
                 if (resolveBySelf)
                 {
@@ -52,10 +52,12 @@ public static class IocHelper
                 }
 
                 registrationBuilder = registrationBuilder.As(depTypes.ToArray());
-                registrationBuilder
-                    // .EnableInterfaceInterceptors()
-                    .EnableClassInterceptors()
-                    .InterceptedBy(typeof(LogInterceptor));
+                if (registerInterceptors)
+                {
+                    registrationBuilder
+                        .EnableClassInterceptors()
+                        .InterceptedBy(typeof(LogInterceptor));
+                }
             }
         }
     }
