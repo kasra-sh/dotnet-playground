@@ -14,7 +14,12 @@ public class ProductManager: ITransientDependency
 
     public virtual async Task<bool> Insert()
     {
-        return await _productRepository.InsertProduct();
+        return await _productRepository.InsertProductsAsync();
+    }
+
+    public virtual async Task<bool> DeleteLast10()
+    {
+        return await _productRepository.DeleteLast10Async();
     }
     
     public virtual async Task<int> WriteLine()

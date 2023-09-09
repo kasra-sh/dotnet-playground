@@ -1,30 +1,51 @@
+using Infant.Data;
 using InfantApp.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace InfantApp.Ef;
 
-public class ProductRepository : IProductRepository
+public class ProductRepository : Repository<Product>, IProductRepository
 {
-    private readonly InfantDbContext _dbContext;
-
-    public ProductRepository(InfantDbContext dbContext)
+    public ProductRepository(InfantDbContext dbContext) : base(dbContext)
     {
-        _dbContext = dbContext;
     }
 
-    public async Task<bool> InsertProduct()
+    public async Task<bool> InsertProductsAsync()
     {
-        var productsSet = _dbContext.Set<Product>();
-        
-        for (int i = 0; i < 200; i++)
+
+        for (int i = 0; i < 1000; i++)
         {
-            productsSet.Add(new Product
+            DbSet.Add(new Product
             {
                 Name = "Abc" + Random.Shared.Next().ToString()
             });
         }
         
-        await _dbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<bool> DeleteLast10Async()
+    {
+        await UpdateOne();
+        var last10 = await DbSet
+            .Where(p => p.IsDeleted == false)
+            .OrderByDescending(p => p.Id)
+            .Take(10).ToListAsync();
+        DbSet.RemoveRange(last10);
+        return await SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> UpdateOne()
+    {
+        var last1 = await DbSet
+            .Where(p => p.IsDeleted == false)
+            .OrderByDescending(p => p.Id)
+            .FirstOrDefaultAsync();
+        
+        // DbSet.Update(last1);
+        last1.Name = "ahcna";
+        return await SaveChangesAsync() > 0;
     }
 }

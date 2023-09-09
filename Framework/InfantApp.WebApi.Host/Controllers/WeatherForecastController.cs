@@ -16,29 +16,26 @@ public class WeatherForecastController : ControllerBase
 
     private readonly ILogger<WeatherForecastController> _logger;
     private readonly ProductManager _productManager;
-    private readonly ICollection<ITransientDependency> _transientDependencies;
     private readonly ApplicationManager _applicationManager;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger, ProductManager productManager, ApplicationManager applicationManager, ICollection<ITransientDependency> transientDependencies)
+    public WeatherForecastController(IServiceProvider serviceProvider)
     {
-        _logger = logger;
-        _productManager = productManager;
-        _applicationManager = applicationManager;
-        _transientDependencies = transientDependencies;
+        _logger = serviceProvider.GetRequiredService<ILogger<WeatherForecastController>>();
+        _productManager = serviceProvider.GetRequiredService<ProductManager>();
+        _applicationManager = serviceProvider.GetRequiredService<ApplicationManager>();
     }
 
-    [HttpGet(Name = "GetWeatherForecast")]
-    public async Task<IActionResult> Get()
+    [HttpGet("InsertProducts")]
+    public async Task<IActionResult> InsertProducts()
     {
         await _productManager.WriteLine();
-        // Console.WriteLine(_productManager);
-        // Console.WriteLine(_applicationManager);
-        return Ok(Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray());
+        return Ok();
+    }
+
+    [HttpDelete("DeleteLast10")]
+    public async Task<IActionResult> DeleteLast10Products()
+    {
+        await _productManager.DeleteLast10();
+        return Ok();
     }
 }

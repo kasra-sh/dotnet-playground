@@ -1,3 +1,4 @@
+using Infant.Core;
 using Infant.Core.Modularity;
 using InfantApp.Ef;
 using InfantApp.Service;
@@ -5,6 +6,7 @@ using InfantApp.Service;
 namespace InfantApp.WebApi.Host;
 
 [DependsOn(
+    typeof(InfantCoreModule),
     typeof(InfantAppServiceModule),
     typeof(InfantAppEfModule)
 )]
