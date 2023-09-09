@@ -3,9 +3,7 @@ using Infant.Core.Models.Ddd;
 using Infant.Core.Models.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Infant.Data;
 
@@ -32,19 +30,23 @@ public abstract class OutboxDbContext : DbContext
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
     {
+        var utcNow = DateTime.UtcNow;
+
         try
         {
             ConfigureEntries<ISoftDeletable>(
                 e =>
                 {
+                    e.State = EntityState.Unchanged;
                     e.Entity.IsDeleted = true;
-                    e.State = EntityState.Modified;
+                    if (e.Entity is IHasDeletedOn entity)
+                    {
+                        entity.DeletedOn = utcNow;
+                    }
                 },
                 EntityState.Deleted
             );
-            
-            var utcNow = DateTime.UtcNow;
-            
+
             ConfigureEntries<IHasCreatedOn>(
                 e => e.Entity.CreatedOn = utcNow,
                 EntityState.Added
@@ -96,12 +98,31 @@ public abstract class OutboxDbContext : DbContext
             entityEntry.Entity.ClearDistributedEvents();
         }
 
-        var serviceProvider = this.GetService<IServiceProvider>();
-
         var tasks = new List<Task>(2);
 
-        var localEventBus = serviceProvider.GetService<ILocalEventBus>();
-        var distributedEventBus = serviceProvider.GetService<IDistributedEventBus>();
+        // var localEventBus = this.GetService<ILocalEventBus>();
+        // var distributedEventBus = this.GetService<IDistributedEventBus>();
+
+        ILocalEventBus? localEventBus = null;
+        IDistributedEventBus? distributedEventBus = null;
+
+        try
+        {
+            localEventBus = this.GetService<ILocalEventBus>();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        try
+        {
+            distributedEventBus = this.GetService<IDistributedEventBus>();
+        }
+        catch
+        {
+            // ignored
+        }
 
         if (localEventBus is not null)
         {
