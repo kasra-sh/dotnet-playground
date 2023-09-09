@@ -1,7 +1,6 @@
 using System.Reflection;
 using Autofac;
 using Infant.Core.DI;
-using Infant.Core.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -24,28 +23,26 @@ public class ApplicationManager
     }
 
     #region Methods
-    
-    public void RegisterApplicationModules(ConfigOptions configOptions = null)
+
+    public void RegisterApplicationModules(IConfiguration configuration)
     {
-        _serviceCollection.Replace(ServiceDescriptor.Singleton<IConfiguration>(
-            ConfigurationHelper.BuildConfiguration(configOptions ?? new ConfigOptions())
-        ));
+        // var impl = ConfigurationHelper.BuildConfiguration(configOptions ?? new ConfigOptions());
+        _serviceCollection.Replace(ServiceDescriptor.Singleton<IConfiguration>(configuration));
+
         RegisterModuleAndDependenciesRecursively(_applicationModuleType);
     }
-    
+
     #endregion
 
     #region Private Methods
-    
-    
-    
+
     private void RegisterModuleAndDependenciesRecursively(Type type)
     {
         if (_initializedModules.Contains(type))
         {
             return;
         }
-        
+
         var dependencyTypes = type.GetCustomAttributes<DependsOnAttribute>()
             .SelectMany(doa => doa.ModuleTypes).ToList();
         if (dependencyTypes.Any())
@@ -55,7 +52,7 @@ public class ApplicationManager
                 RegisterModuleAndDependenciesRecursively(dependencyType);
             }
         }
-        
+
         InitializeModule(type);
 
         _initializedModules.Add(type);
@@ -64,31 +61,23 @@ public class ApplicationManager
     private void AutoRegisterModuleDependenciesFromAssembly(Type module, bool resolveBySelf = true)
     {
         if (_initializedAssemblies.Contains(module.Assembly)) return;
-    
+
         IocHelper.RegisterConventionalDependenciesFromAssembly(_serviceCollection, module.Assembly, resolveBySelf);
         _initializedAssemblies.Add(module.Assembly);
     }
-    
+
     private void InitializeModule(Type type)
     {
-        try
+        var moduleInstance = Activator.CreateInstance(type) as AppModule;
+
+        if (moduleInstance!.AutoRegisterDependencies)
         {
-            var moduleInstance = Activator.CreateInstance(type) as AppModule;
-            
-            if (moduleInstance == null) throw new Exception();
-            
-            if (moduleInstance.AutoRegisterDependencies)
-            {
-                AutoRegisterModuleDependenciesFromAssembly(type);
-            }
-            moduleInstance.ConfigureServices(_serviceCollection);
+            AutoRegisterModuleDependenciesFromAssembly(type);
         }
-        catch (Exception)
-        {
-            throw new ApplicationException($"Could not instantiate \"{type.Name}\" [{type.FullName}]");
-        }
+
+        _serviceCollection.AddSingleton<AppModule>(provider => moduleInstance);
+        moduleInstance.ConfigureServices(_serviceCollection);
     }
 
     #endregion
-
 }

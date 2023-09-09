@@ -1,4 +1,6 @@
 using Autofac;
+using Infant.Core.DI;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -9,7 +11,7 @@ public static class ServiceCollectionExtensions
     public static T GetSingletonInstanceOrNull<T>(this IServiceCollection services)
     {
         return (T)services
-            .FirstOrDefault(d => d.ServiceType == typeof(T))
+            .FirstOrDefault(d => d.ServiceType == typeof(T) && d.ImplementationInstance != null)
             ?.ImplementationInstance;
     }
 
@@ -29,11 +31,35 @@ public static class ServiceCollectionExtensions
         return GetSingletonInstance<IConfiguration>(services);
     }
 
-    public static void AddApplicationModule<TModule>(this IServiceCollection serviceCollection)
+    public static void AddApplicationModule<TModule>(this IServiceCollection serviceCollection, WebApplicationBuilder webApplicationBuilder)
     {
         var applicationManager = new ApplicationManager(serviceCollection, typeof(TModule));
         serviceCollection.AddSingleton(applicationManager);
-        applicationManager.RegisterApplicationModules();
+        applicationManager.RegisterApplicationModules(webApplicationBuilder.Configuration);
         // return serviceCollection;
+    }
+    
+    public static ObjectAccessor<T> AddObjectAccessor<T>(this IServiceCollection services)
+    {
+        return services.AddObjectAccessor(new ObjectAccessor<T>());
+    }
+
+    public static ObjectAccessor<T> AddObjectAccessor<T>(this IServiceCollection services, T obj)
+    {
+        return services.AddObjectAccessor(new ObjectAccessor<T>(obj));
+    }
+
+    public static ObjectAccessor<T> AddObjectAccessor<T>(this IServiceCollection services, ObjectAccessor<T> accessor)
+    {
+        if (services.Any(s => s.ServiceType == typeof(ObjectAccessor<T>)))
+        {
+            throw new ApplicationException("An object accessor is registered before for type: " + typeof(T).AssemblyQualifiedName);
+        }
+
+        //Add to the beginning for fast retrieve
+        services.Insert(0, ServiceDescriptor.Singleton(typeof(ObjectAccessor<T>), accessor));
+        services.Insert(0, ServiceDescriptor.Singleton(typeof(IObjectAccessor<T>), accessor));
+
+        return accessor;
     }
 }
