@@ -3,25 +3,25 @@ using Infant.Core.Models.Ddd;
 
 namespace Infant.Core.Events;
 
-internal class EventCallbackInfo
+internal class Subscription
 {
-    public Action<object> Callback { get; set; }
-    public Type EventType { get; set; }
+    public object SubscriberActionRef { get; set; }
+    public Action<object> WrappedCallback { get; set; }
 }
 
-public class LocalEventBus: ILocalEventBus
+public class LocalEventBus : ILocalEventBus
 {
     private ConcurrentQueue<object> _eventObjects = new ConcurrentQueue<object>();
-    private Dictionary<Type, List<Action<object>>?> _listeners = new();
+    private ConcurrentDictionary<Type, List<Subscription>> _subscriptions = new ConcurrentDictionary<Type, List<Subscription>>();
     private SemaphoreSlim _semaphoreSlim = new(1);
     private bool IsDisposed { get; set; }
-    
+
     public LocalEventBus()
     {
         Task.Factory.StartNew(async () =>
         {
             var delayMs = 1;
-            
+
             while (!IsDisposed)
             {
                 while (_eventObjects.IsEmpty)
@@ -33,37 +33,49 @@ public class LocalEventBus: ILocalEventBus
                 delayMs = 1;
 
                 var gotEvent = _eventObjects.TryDequeue(out var result);
+
                 if (gotEvent && result != null)
                 {
-                    foreach (var action in _listeners[result.GetType()])
+                    var type = result.GetType();
+
+                    var subscriptions = _subscriptions[type];
+
+                    foreach (var subscription in subscriptions)
                     {
-                        Task.Factory.StartNew(() => action.Invoke(result));
+                        Task.Run(() => subscription.WrappedCallback.Invoke(result));
                     }
                 }
             }
         }, TaskCreationOptions.LongRunning | TaskCreationOptions.PreferFairness | TaskCreationOptions.DenyChildAttach);
     }
-    
+
     public async Task PublishMessageAsync<T>(T eventObject)
     {
         _eventObjects.Enqueue(eventObject);
     }
-    public async Task PublishMessagesAsync<T>(IEnumerable<T> eventObject)
-    {
-        
-        _eventObjects.Enqueue(eventObject);
-    }
 
+    public async Task PublishMessagesAsync<T>(IEnumerable<T> eventObjects)
+    {
+        foreach (var eventObj in eventObjects)
+        {
+            _eventObjects.Enqueue(eventObj);
+        }
+    }
+    
     public async Task Subscribe<T>(Action<T> callback)
     {
         await _semaphoreSlim.WaitAsync();
 
-        var callbacks = GetCallbacksForType<T>();
-        
-        if (!callbacks.Contains(callback))
+        var subs = _subscriptions.GetOrAdd(typeof(T), type => new List<Subscription>());
+
+        subs.Add(new()
         {
-            callbacks.Add(callback);
-        }
+            SubscriberActionRef = callback,
+            WrappedCallback = async (e) =>
+            {
+                callback((T) e);
+            }
+        });
         
         _semaphoreSlim.Release();
     }
@@ -71,25 +83,16 @@ public class LocalEventBus: ILocalEventBus
     public async Task UnSubscribe<T>(Action<T> callback)
     {
         await _semaphoreSlim.WaitAsync();
-        
-        var callbacks = GetCallbacksForType<T>();
-        
-        callbacks.Remove(callback);
-        
-        _semaphoreSlim.Release();
-    }
 
-    private List<Action<T>> GetCallbacksForType<T>()
-    {
-        var callbacks = _listeners[typeof(T)];
+        _subscriptions.TryGetValue(typeof(T), out var callbacks);
+
+        var subscriberCallback = callbacks?.FirstOrDefault(c => (Action<T>) c.SubscriberActionRef == callback);
         
-        if (callbacks == null)
+        if (subscriberCallback != null)
         {
-            callbacks = new List<Action<object>>();
-            _listeners[typeof(T)] = callbacks;
+            callbacks?.Remove(subscriberCallback);
         }
 
-        return callbacks as List<Action<T>>;
+        _semaphoreSlim.Release();
     }
-
 }
