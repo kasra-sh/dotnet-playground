@@ -1,6 +1,6 @@
 namespace Infant.Core.Models.Entity;
 
-public abstract class FullAuditedEntity<TKey> : IEntity<TKey>, ISoftDeletable, ICreationAudited, IModificationAudited
+public abstract class FullAuditedEntity<TKey> : IEntity<TKey>, ISoftDeletable, IHasDeletedOn, ICreationAudited, IModificationAudited
     where TKey : struct
 {
     public DateTime? UpdatedOn { get; set; }
@@ -9,6 +9,7 @@ public abstract class FullAuditedEntity<TKey> : IEntity<TKey>, ISoftDeletable, I
     public TKey Id { get; set; }
     public DateTime CreatedOn { get; set; }
     public Guid? CreatorId { get; set; }
+    public DateTime? DeletedOn { get; set; }
 }
 
 public interface IFullAudited : ISoftDeletable, ICreationAudited, IModificationAudited
@@ -53,6 +54,11 @@ public interface IEntity<TKey>
 public interface ISoftDeletable
 {
     public bool IsDeleted { get; set; }
+}
+
+public interface IHasDeletedOn
+{
+    public DateTime? DeletedOn { get; set; }
 }
 
 public interface IMayHaveUpdater
