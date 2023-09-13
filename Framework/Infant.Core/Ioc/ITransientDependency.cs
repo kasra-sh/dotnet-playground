@@ -1,4 +1,4 @@
-namespace Infant.Core.DI;
+namespace Infant.Core.Ioc;
 
 public interface ITransientDependency
 {

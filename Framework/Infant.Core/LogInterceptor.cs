@@ -1,4 +1,5 @@
 using Castle.DynamicProxy;
+using Serilog;
 
 namespace Infant.Core;
 
@@ -12,14 +13,15 @@ public class LogInterceptor : AsyncInterceptorBase, IInterceptor
     {
         this.ToInterceptor().Intercept(invocation);
     }
+    
     protected override async Task InterceptAsync(IInvocation invocation, IInvocationProceedInfo proceedInfo, Func<IInvocation, IInvocationProceedInfo, Task> proceed)
     {
         try
         {
             // Cannot simply return the the task, as any exceptions would not be caught below.
-            Console.WriteLine("before::"+invocation);
+            Log.Information("Before calling method {Method}", invocation.Method.Name);
             await proceed(invocation, proceedInfo).ConfigureAwait(false);
-            Console.WriteLine("after::"+invocation);
+            Log.Information("Called method {Method}", invocation.Method.Name);
         }
         catch (Exception ex)
         {
@@ -34,16 +36,15 @@ public class LogInterceptor : AsyncInterceptorBase, IInterceptor
         try
         {
             // Cannot simply return the the task, as any exceptions would not be caught below.
-            Console.WriteLine("before::"+invocation);
-
+            Log.Information("Before calling method {Method}", proceedInfo);
             var res = await proceed(invocation, proceedInfo).ConfigureAwait(false);
-            Console.WriteLine("after::"+invocation);
+            Log.Information("Called method {Method}", invocation.GetConcreteMethod());
 
             return res;
         }
         catch (Exception ex)
         {
-            // Log.Error($"Error calling {invocation.Method.Name}.", ex);
+            Log.Error($"Error calling {invocation.Method.Name}.", ex);
             throw;
         }
     }

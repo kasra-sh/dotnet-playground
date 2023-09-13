@@ -1,5 +1,5 @@
 using Autofac;
-using Infant.Core.DI;
+using Infant.Core.Ioc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,7 +36,6 @@ public static class ServiceCollectionExtensions
         var applicationManager = new ApplicationManager(serviceCollection, typeof(TModule));
         serviceCollection.AddSingleton(applicationManager);
         applicationManager.RegisterApplicationModules(webApplicationBuilder.Configuration);
-        // return serviceCollection;
     }
     
     public static ObjectAccessor<T> AddObjectAccessor<T>(this IServiceCollection services)

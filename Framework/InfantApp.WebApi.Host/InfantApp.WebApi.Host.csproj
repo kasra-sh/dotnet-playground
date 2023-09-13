@@ -17,12 +17,14 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.9" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+        <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Infant.Core\Infant.Core.csproj" />
-      <ProjectReference Include="..\Infant.Host\Infant.Host.csproj" />
+      <ProjectReference Include="..\Infant.Host.Web\Infant.Host.Web.csproj" />
       <ProjectReference Include="..\InfantApp.Ef\InfantApp.Ef.csproj" />
       <ProjectReference Include="..\InfantApp.Service\InfantApp.Service.csproj" />
     </ItemGroup>

@@ -1,11 +1,11 @@
 ﻿using Infant.Core.Events;
-using Infant.Core.Models.Ddd;
-using Infant.Core.Models.Entity;
+using Infant.Core.Models.Domain;
+using Infant.Core.Models.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace Infant.Data;
+namespace Infant.Data.EntityFrameworkCore;
 
 public abstract class OutboxDbContext : DbContext
 {

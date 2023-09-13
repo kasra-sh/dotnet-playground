@@ -1,4 +1,5 @@
-using Infant.Core.DI;
+using Infant.Core.Ioc;
+using Infant.Core.Models.Domain.Shared;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace InfantApp.Domain;
@@ -28,5 +29,10 @@ public class ProductManager: ITransientDependency
         Console.WriteLine("My line");
         await Insert();
         return 1;
+    }
+
+    public virtual async Task<PagedResultDto<Product>> GetPaged(int size, int num, string sorting)
+    {
+        return await _productRepository.GetPagedList(size, num, sorting);
     }
 }

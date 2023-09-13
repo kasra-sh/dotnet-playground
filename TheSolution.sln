@@ -16,9 +16,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfantApp.Ef", "Framework\I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfantApp.WebApi.Host", "Framework\InfantApp.WebApi.Host\InfantApp.WebApi.Host.csproj", "{E4357D31-55FE-450A-9F10-D6CDF0983F78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infant.Host", "Framework\Infant.Host\Infant.Host.csproj", "{163CFD02-34FE-4E52-870F-BF5F3D211EE5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infant.Host.Web", "Framework\Infant.Host.Web\Infant.Host.Web.csproj", "{163CFD02-34FE-4E52-870F-BF5F3D211EE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infant.Data", "Framework\Infant.Data\Infant.Data.csproj", "{A9B6F0E4-4022-4E69-8836-10F7203F83B5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infant.Data.EntityFrameworkCore", "Framework\Infant.Data.EntityFrameworkCore\Infant.Data.EntityFrameworkCore.csproj", "{A9B6F0E4-4022-4E69-8836-10F7203F83B5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

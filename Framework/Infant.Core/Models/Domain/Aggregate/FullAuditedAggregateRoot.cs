@@ -1,7 +1,6 @@
-using System.Collections.ObjectModel;
-using Infant.Core.Models.Entity;
+using Infant.Core.Models.Domain.Entity;
 
-namespace Infant.Core.Models.Ddd;
+namespace Infant.Core.Models.Domain.Aggregate;
 
 public abstract class FullAuditedAggregateRoot : OutBoxObject, IEntity, IFullAudited
 {

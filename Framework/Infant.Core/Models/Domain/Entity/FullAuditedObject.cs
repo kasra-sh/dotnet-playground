@@ -1,4 +1,4 @@
-namespace Infant.Core.Models.Entity;
+namespace Infant.Core.Models.Domain.Entity;
 
 public abstract class FullAuditedEntity<TKey> : IEntity<TKey>, ISoftDeletable, IHasDeletedOn, ICreationAudited, IModificationAudited
     where TKey : struct
@@ -46,7 +46,7 @@ public interface IEntity
 {
     
 }
-public interface IEntity<TKey>
+public interface IEntity<TKey>: IEntity
 {
     public TKey Id { get; set; }
 }

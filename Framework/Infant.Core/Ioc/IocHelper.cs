@@ -7,7 +7,7 @@ using Infant.Core.Modularity;
 using Infant.Core.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infant.Core.DI;
+namespace Infant.Core.Ioc;
 
 public static class IocHelper
 {

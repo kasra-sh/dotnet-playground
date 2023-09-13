@@ -1,5 +1,4 @@
-using Infant.Core.DI;
-using Infant.Core.Models.Ddd;
+using Infant.Core.Ioc;
 
 namespace Infant.Core.Events;
 

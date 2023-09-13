@@ -1,9 +1,10 @@
 using System.Reflection;
 using Autofac;
-using Infant.Core.DI;
+using Infant.Core.Ioc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Serilog;
 
 namespace Infant.Core.Modularity;
 
@@ -43,8 +44,10 @@ public class ApplicationManager
             return;
         }
 
+        _initializedModules.Add(type);
+        
         var dependencyTypes = type.GetCustomAttributes<DependsOnAttribute>()
-            .SelectMany(doa => doa.ModuleTypes).ToList();
+            .SelectMany(doa => doa.ModuleTypes).ToHashSet();
         if (dependencyTypes.Any())
         {
             foreach (var dependencyType in dependencyTypes)
@@ -55,7 +58,6 @@ public class ApplicationManager
 
         InitializeModule(type);
 
-        _initializedModules.Add(type);
     }
 
     private void AutoRegisterModuleDependenciesFromAssembly(Type module, bool resolveBySelf = true)

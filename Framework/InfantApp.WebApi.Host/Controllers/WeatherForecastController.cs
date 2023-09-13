@@ -1,4 +1,4 @@
-using Infant.Core.DI;
+using Infant.Core.Models.Domain.Shared;
 using Infant.Core.Modularity;
 using InfantApp.Domain;
 using Microsoft.AspNetCore.Mvc;
@@ -37,5 +37,11 @@ public class WeatherForecastController : ControllerBase
     {
         await _productManager.DeleteLast10();
         return Ok();
+    }
+
+    [HttpGet("GetPagedProducts")]
+    public async Task<IActionResult> GetPagedProducts(int size, int num, string sort)
+    {
+        return Ok(await _productManager.GetPaged(size, num, sort));
     }
 }

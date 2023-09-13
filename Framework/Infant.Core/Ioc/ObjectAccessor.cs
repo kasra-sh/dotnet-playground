@@ -1,5 +1,5 @@
 #nullable enable
-namespace Infant.Core.DI;
+namespace Infant.Core.Ioc;
 public interface IObjectAccessor<out T>
 {
     T? Value { get; }

@@ -1,4 +1,4 @@
-namespace Infant.Core.Models.Ddd;
+namespace Infant.Core.Models.Domain;
 
 public abstract class OutBoxObject: IOutBoxObject
 {

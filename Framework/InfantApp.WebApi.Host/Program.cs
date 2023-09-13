@@ -7,10 +7,11 @@ using Infant.Host;
 using InfantApp.Domain.Eto;
 using InfantApp.Ef;
 using InfantApp.WebApi.Host;
-using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 
 var webAppBuilder = WebApplication.CreateBuilder(args);
+
 await webAppBuilder.AddApplicationAsync<InfantAppWebApiHostModule>();
 
 // Add services to the container.
@@ -23,6 +24,7 @@ if (webAppBuilder.Environment.IsDevelopment())
     webAppBuilder.Services.AddSwaggerGen();
 }
 
+webAppBuilder.Logging.ClearProviders().AddSerilog();
 
 var app = webAppBuilder.Build();
 

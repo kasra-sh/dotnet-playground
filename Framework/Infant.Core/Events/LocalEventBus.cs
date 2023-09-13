@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using Infant.Core.Models.Ddd;
 
 namespace Infant.Core.Events;
 

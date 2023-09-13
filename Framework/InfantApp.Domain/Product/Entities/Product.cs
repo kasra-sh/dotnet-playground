@@ -1,5 +1,4 @@
-using Infant.Core.Models.Ddd;
-using Infant.Core.Models.Entity;
+using Infant.Core.Models.Domain.Aggregate;
 using InfantApp.Domain.Eto;
 
 namespace InfantApp.Domain;

@@ -1,4 +1,3 @@
-using Infant.Core.DI;
 using Infant.Core.Modularity;
 using Microsoft.Extensions.DependencyInjection;
 

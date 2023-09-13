@@ -1,5 +1,5 @@
-﻿using Infant.Core.Models.Ddd;
-using Infant.Data;
+﻿using Infant.Data;
+using Infant.Data.EntityFrameworkCore;
 using InfantApp.Domain;
 using Microsoft.EntityFrameworkCore;
 
