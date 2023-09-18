@@ -7,29 +7,28 @@ namespace InfantApp.WebApi.Host.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class WeatherForecastController : ControllerBase
+public class ProductController : ControllerBase
 {
     private static readonly string[] Summaries = new[]
     {
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     };
 
-    private readonly ILogger<WeatherForecastController> _logger;
+    private readonly ILogger<ProductController> _logger;
     private readonly ProductManager _productManager;
-    private readonly ApplicationManager _applicationManager;
+    private readonly AppModuleManager _appModuleManager;
 
-    public WeatherForecastController(IServiceProvider serviceProvider)
+    public ProductController(IServiceProvider serviceProvider)
     {
-        _logger = serviceProvider.GetRequiredService<ILogger<WeatherForecastController>>();
+        _logger = serviceProvider.GetRequiredService<ILogger<ProductController>>();
         _productManager = serviceProvider.GetRequiredService<ProductManager>();
-        _applicationManager = serviceProvider.GetRequiredService<ApplicationManager>();
+        _appModuleManager = serviceProvider.GetRequiredService<AppModuleManager>();
     }
 
     [HttpGet("InsertProducts")]
-    public async Task<IActionResult> InsertProducts()
+    public async Task<ActionResult<int>> InsertProducts()
     {
-        await _productManager.WriteLine();
-        return Ok();
+        return Ok(await _productManager.WriteLine());
     }
 
     [HttpDelete("DeleteLast10")]
@@ -40,7 +39,7 @@ public class WeatherForecastController : ControllerBase
     }
 
     [HttpGet("GetPagedProducts")]
-    public async Task<IActionResult> GetPagedProducts(int size, int num, string sort)
+    public async Task<ActionResult<PagedResultDto<Product>>> GetPagedProducts(int size, int num, string sort)
     {
         return Ok(await _productManager.GetPaged(size, num, sort));
     }

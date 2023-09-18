@@ -11,16 +11,5 @@ public class InfantDbContext: OutboxDbContext
     public InfantDbContext(DbContextOptions options): base(options)
     {
     }
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-    }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        // modelBuilder.Entity<Product>()
-            // .HasKey(p => p.Id);
-        base.OnModelCreating(modelBuilder);
-    }
-    
 }

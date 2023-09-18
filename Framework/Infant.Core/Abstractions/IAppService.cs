@@ -1,6 +1,8 @@
+using Infant.Core.Ioc;
+
 namespace Infant.Core.Abstractions;
 
-public interface IAppService
+public interface IAppService: ITransientDependency
 {
     
 }

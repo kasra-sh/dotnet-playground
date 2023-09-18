@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
 
     public static void AddApplicationModule<TModule>(this IServiceCollection serviceCollection, WebApplicationBuilder webApplicationBuilder)
     {
-        var applicationManager = new ApplicationManager(serviceCollection, typeof(TModule));
+        var applicationManager = new AppModuleManager(serviceCollection, typeof(TModule));
         serviceCollection.AddSingleton(applicationManager);
         applicationManager.RegisterApplicationModules(webApplicationBuilder.Configuration);
     }

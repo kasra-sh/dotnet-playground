@@ -19,14 +19,13 @@ public static class IocHelper
             [typeof(IScopedDependency)] = ServiceLifetime.Scoped
         };
 
-    private static readonly HashSet<Type> _interceptors = new HashSet<Type>();
+    // private static readonly HashSet<Type> _interceptors = new HashSet<Type>();
 
     public static void RegisterConventionalDependenciesFromAssembly(IServiceCollection serviceCollection, Assembly assembly,
         bool resolveBySelf = true,
         bool registerInterceptors = true)
     {
-        RegisterInterceptor(serviceCollection, typeof(LogInterceptor));
-
+        var appModuleManager = serviceCollection.GetSingletonInstance<AppModuleManager>();
         var containerBuilder = serviceCollection.GetSingletonInstance<ContainerBuilder>();
         var dependencyTypes = DependencyLifetimeMapping.Keys.ToArray();
         foreach (var dependencyType in dependencyTypes)
@@ -54,27 +53,16 @@ public static class IocHelper
                 registrationBuilder = registrationBuilder.As(depTypes.ToArray());
                 if (registerInterceptors)
                 {
-                    registrationBuilder
-                        .EnableClassInterceptors()
-                        .InterceptedBy(typeof(LogInterceptor));
+                    var interceptors = appModuleManager.GetInterceptorsForTargetTypes(depTypes);
+                    if (interceptors.Any())
+                    {
+                        registrationBuilder
+                            .EnableClassInterceptors()
+                            .InterceptedBy(interceptors);
+                    }
                 }
             }
         }
-    }
-
-    private static void RegisterInterceptor(IServiceCollection serviceCollection, Type interceptor)
-    {
-        if (!interceptor.IsAssignableTo<IAsyncInterceptor>())
-        {
-            throw new Exception($"Type [{interceptor.FullName}] does not implement [{nameof(IAsyncInterceptor)}].");
-        }
-
-        if (!serviceCollection.Any(s => s.ServiceType == interceptor))
-        {
-            serviceCollection.AddTransient<LogInterceptor>();
-        }
-
-        _interceptors.Add(interceptor);
     }
 
     private static bool IsConcreteClassType(Type t)

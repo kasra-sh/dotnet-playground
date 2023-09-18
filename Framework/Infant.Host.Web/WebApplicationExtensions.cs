@@ -1,5 +1,4 @@
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Infant.Core.Modularity;
 using Serilog;
 using Serilog.Events;
@@ -10,17 +9,10 @@ using AutofacServiceProviderFactory = Infant.Core.Modularity.AutofacServiceProvi
 
 namespace Infant.Host;
 
-public class WebApplicationSettings
-{
-    public bool AddSwaggerUiForDevelopment { get; set; } = false;
-    public bool AddSwaggerUiForProduction { get; set; } = false;
-    public bool AddControllers { get; set; } = false;
-}
-
 public static class WebApplicationExtensions
 {
     public static async Task AddApplicationAsync<TModule>(
-        this WebApplicationBuilder webAppBuilder)
+        this WebApplicationBuilder webAppBuilder, WebApplicationSettings settings = null)
     {
         if (Log.Logger.GetType().Name == "SilentLogger")
         {
@@ -28,6 +20,14 @@ public static class WebApplicationExtensions
                 .WriteTo.Console(theme: AnsiConsoleTheme.Sixteen)
                 .CreateLogger();
         }
+
+        if (settings is null)
+        {
+            settings = new WebApplicationSettings();
+        }
+
+        webAppBuilder.Services.AddSingleton(settings);
+        
         var containerBuilder = new ContainerBuilder();
         webAppBuilder.Services.AddSingleton(containerBuilder);
         webAppBuilder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(containerBuilder));

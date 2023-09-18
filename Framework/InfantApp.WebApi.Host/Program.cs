@@ -1,5 +1,3 @@
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Infant.Core;
 using Infant.Core.Events;
 using Infant.Core.Modularity;
@@ -12,8 +10,6 @@ using Serilog;
 
 var webAppBuilder = WebApplication.CreateBuilder(args);
 
-await webAppBuilder.AddApplicationAsync<InfantAppWebApiHostModule>();
-
 // Add services to the container.
 
 webAppBuilder.Services.AddControllers();
@@ -25,6 +21,10 @@ if (webAppBuilder.Environment.IsDevelopment())
 }
 
 webAppBuilder.Logging.ClearProviders().AddSerilog();
+await webAppBuilder.AddApplicationAsync<InfantAppWebApiHostModule>(new WebApplicationSettings
+{
+    Interceptors = new []{typeof(LogInterceptor)}
+});
 
 var app = webAppBuilder.Build();
 

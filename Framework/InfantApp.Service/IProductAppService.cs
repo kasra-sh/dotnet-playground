@@ -3,6 +3,6 @@ using Infant.Core.Ioc;
 
 namespace InfantApp.Service;
 
-public class ProductAppService: IProductAppService
+public interface IProductAppService : IAppService
 {
 }

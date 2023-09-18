@@ -1,8 +1,11 @@
 using Castle.DynamicProxy;
+using Infant.Core.Abstractions;
+using Infant.Core.Ioc;
 using Serilog;
 
 namespace Infant.Core;
 
+[Intercepts(typeof(IAppService))]
 public class LogInterceptor : AsyncInterceptorBase, IInterceptor
 {
     public LogInterceptor(IServiceProvider serviceProvider)
