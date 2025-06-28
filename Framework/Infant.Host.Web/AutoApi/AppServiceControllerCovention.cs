@@ -55,6 +55,7 @@ public class AppServiceControllerConvention : IControllerModelConvention
                     // Name = controller.ControllerName.Replace("AppService", "").Replace("Service", "")
                 }
             });
+            // Inject controller properties from services
             foreach (var controllerControllerProperty in controller.ControllerProperties)
             {
                 var propType = controllerControllerProperty.PropertyInfo.PropertyType;
