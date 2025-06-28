@@ -70,23 +70,14 @@ public static class IocHelper
         return t.IsClass && !t.IsAbstract;
     }
 
-    private static bool IsNonConcreteClassType(Type t, Type dependencyType)
-    {
-        return t.IsAbstract || (t.IsInterface && t != dependencyType);
-    }
-
     private static IRegistrationBuilder<T1, T2, T3> SetAutofacLifetime<T1, T2, T3>(this IRegistrationBuilder<T1, T2, T3> registrationBuilder, ServiceLifetime lifetime)
     {
-        switch (lifetime)
+        return lifetime switch
         {
-            case ServiceLifetime.Singleton:
-                return registrationBuilder.SingleInstance();
-            case ServiceLifetime.Scoped:
-                return registrationBuilder.InstancePerLifetimeScope();
-            case ServiceLifetime.Transient:
-                return registrationBuilder.InstancePerDependency();
-            default:
-                return registrationBuilder;
-        }
+            ServiceLifetime.Singleton => registrationBuilder.SingleInstance(),
+            ServiceLifetime.Scoped => registrationBuilder.InstancePerLifetimeScope(),
+            ServiceLifetime.Transient => registrationBuilder.InstancePerDependency(),
+            _ => registrationBuilder
+        };
     }
 }
