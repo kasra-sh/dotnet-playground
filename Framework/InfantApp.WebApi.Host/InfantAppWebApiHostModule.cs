@@ -3,6 +3,8 @@ using Infant.Core.Modularity;
 using Infant.Host;
 using InfantApp.Ef;
 using InfantApp.Service;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace InfantApp.WebApi.Host;
 
@@ -15,6 +17,10 @@ namespace InfantApp.WebApi.Host;
 public class InfantAppWebApiHostModule : AppModule
 {
     public override void ConfigureServices(IServiceCollection services)
+    {
+    }
+
+    public override void OnApplicationInitialization(IServiceProvider services)
     {
     }
 }

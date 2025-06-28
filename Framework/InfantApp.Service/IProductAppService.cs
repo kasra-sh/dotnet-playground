@@ -5,4 +5,5 @@ namespace InfantApp.Service;
 
 public interface IProductAppService : IAppService
 {
+    Task<bool> GetDoSome();
 }
