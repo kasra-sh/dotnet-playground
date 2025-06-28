@@ -24,7 +24,7 @@ public abstract class EfCrudRepository<T, TKey> : EfRepositoryBase<T>, IEfCrudRe
 
     public async Task<PagedResultDto<T>> GetPagedList(int pageSize, int pageNum, string sorting = null, CancellationToken cancellationToken = default)
     {
-        return await GetQueryable(true).WhereDynamic("IsDeleted == true").OrderBy(sorting ?? "Id ASC").ToPagedListAsync(pageSize, pageNum, cancellationToken);
+        return await GetQueryable().OrderBy(sorting ?? "Id ASC").ToPagedListAsync(pageSize, pageNum, cancellationToken);
     }
 
     public async Task<T> Insert(T entity, bool saveChangesNow = false, CancellationToken cancellationToken = default)

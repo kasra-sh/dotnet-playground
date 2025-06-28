@@ -6,7 +6,9 @@ namespace Infant.Data.EntityFrameworkCore;
 public abstract class EfRepositoryBase<T> where T : class, IEntity
 {
     private readonly DbContext _dbContext;
-    private static readonly bool SoftDeletable = typeof(T).IsAssignableTo(typeof(ISoftDeletable));
+    private readonly bool _softDeletable = typeof(T).IsAssignableTo(typeof(ISoftDeletable));
+    private readonly bool _mayHaveTenant = typeof(T).IsAssignableTo(typeof(IMayHaveTenant));
+    private bool? _includeDeleted = null;
     public EfRepositoryBase(DbContext dbContext)
     {
         _dbContext = dbContext;
@@ -21,14 +23,20 @@ public abstract class EfRepositoryBase<T> where T : class, IEntity
 
     protected IQueryable<T> GetQueryable(bool includeDeleted = false)
     {
-        if ((!includeDeleted) && SoftDeletable)
+        if (_softDeletable && (!includeDeleted))
         {
-            return _dbContext.Set<T>().Where(entity => ((ISoftDeletable) entity).IsDeleted != true);
+            return _dbContext.Set<T>().NotDeleted();
         }
 
         return _dbContext.Set<T>();
     }
 
+    public EfRepositoryBase<T> SetIncludeDeleted(bool includeDeleted)
+    {
+        this._includeDeleted = includeDeleted;
+        return this;
+    }
+    
     protected async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         return await _dbContext.SaveChangesAsync(cancellationToken);

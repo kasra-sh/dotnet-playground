@@ -44,8 +44,13 @@ public static class QueryableExtensions
         return queryable.OrderBy(ordering);
     }
 
-    public static IQueryable<T> NotDeleted<T>(this IQueryable<T> queryable) where T : IEntity, ISoftDeletable
+    public static IQueryable<T> NotDeleted<T>(this IQueryable<T> queryable) where T : IEntity
     {
-        return queryable.Where(e => e.IsDeleted != true);
+        if (typeof(T) is ISoftDeletable)
+        {
+            return (queryable as IQueryable<ISoftDeletable>).Where(e => e.IsDeleted != true) as IQueryable<T>;
+        }
+
+        return queryable;
     }
 }
