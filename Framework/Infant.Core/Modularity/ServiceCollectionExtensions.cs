@@ -31,13 +31,6 @@ public static class ServiceCollectionExtensions
         return GetSingletonInstance<IConfiguration>(services);
     }
 
-    public static void AddApplicationModule<TModule>(this IServiceCollection serviceCollection, WebApplicationBuilder webApplicationBuilder)
-    {
-        var applicationManager = new AppModuleManager(serviceCollection, typeof(TModule));
-        serviceCollection.AddSingleton(applicationManager);
-        applicationManager.RegisterApplicationModules(webApplicationBuilder.Configuration);
-    }
-    
     public static ObjectAccessor<T> AddObjectAccessor<T>(this IServiceCollection services)
     {
         return services.AddObjectAccessor(new ObjectAccessor<T>());
