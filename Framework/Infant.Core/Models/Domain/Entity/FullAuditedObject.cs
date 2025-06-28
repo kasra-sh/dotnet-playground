@@ -56,6 +56,11 @@ public interface ISoftDeletable
     public bool IsDeleted { get; set; }
 }
 
+public interface IMayHaveTenant
+{
+    public Guid? TenantId { get; set; }
+}
+
 public interface IHasDeletedOn
 {
     public DateTime? DeletedOn { get; set; }
