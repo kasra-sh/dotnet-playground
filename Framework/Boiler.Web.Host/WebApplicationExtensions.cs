@@ -17,23 +17,13 @@ public static class WebApplicationExtensions
         webApplicationBuilder.Services.AddSingleton(applicationManager);
         applicationManager.RegisterApplicationModules(webApplicationBuilder.Configuration);
     }
+
     public static async Task AddApplicationAsync<TModule>(
         this WebApplicationBuilder webAppBuilder, WebApplicationSettings settings = null)
     {
-        // replace SilentLogger with ConsoleLogger
-        if (Log.Logger.GetType().Name == "SilentLogger")
-        {
-            Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console(theme: AnsiConsoleTheme.Sixteen)
-                .CreateLogger();
-        }
+        SetupSerilog();
 
-        if (settings is null)
-        {
-            settings = new WebApplicationSettings();
-        }
-
-        webAppBuilder.Services.AddSingleton(settings);
+        webAppBuilder.Services.AddSingleton(settings ?? new WebApplicationSettings());
 
         webAppBuilder.Services.AddHttpContextAccessor();
 
@@ -42,6 +32,17 @@ public static class WebApplicationExtensions
         webAppBuilder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(containerBuilder));
 
         webAppBuilder.AddApplicationModule<TModule>();
+    }
+
+    private static void SetupSerilog()
+    {
+        // // replace SilentLogger with ConsoleLogger
+        if (Log.Logger.GetType().Name.Contains("Silent"))
+        {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console(theme: AnsiConsoleTheme.Sixteen)
+                .CreateLogger();
+        }
     }
 
     public static async Task InitializeApplicationAsync(this WebApplication app)
@@ -101,13 +102,13 @@ public static class WebApplicationExtensions
             {
                 var controllerName = apiDesc.ActionDescriptor.RouteValues["controller"];
                 var actionName = apiDesc.ActionDescriptor.RouteValues["action"];
-                // var methodNAme = apiDesc.ActionDescriptor.RouteValues["method"];
-                return $"{controllerName}_{actionName}";
+                var methodName = apiDesc.HttpMethod;
+                return $"{controllerName}_{actionName}_{methodName}";
             });
             c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
             c.TagActionsBy(apiDesc =>
             {
-                var controller = apiDesc.ActionDescriptor.RouteValues["controller"].Replace("AppService", "");
+                var controller = apiDesc?.ActionDescriptor?.RouteValues["controller"]?.Replace("AppService", "");
                 // var action = apiDesc.ActionDescriptor.RouteValues["action"];
                 return new[] { $"{controller}" };
             });
