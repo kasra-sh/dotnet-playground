@@ -6,7 +6,7 @@ using Boiler.Core.Domain.Entity;
 using Boiler.Core.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
 
-namespace Boiler.Core.EfCore.EntityFrameworkCore;
+namespace Boiler.Data.EfCore.EntityFrameworkCore;
 
 public static class QueryableExtensions
 {

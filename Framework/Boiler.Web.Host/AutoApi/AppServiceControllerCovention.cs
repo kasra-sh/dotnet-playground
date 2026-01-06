@@ -1,17 +1,11 @@
-using System.Linq;
 using Boiler.Core.Abstractions;
+using Boiler.Core.Modularity.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Routing;
 
-namespace Infant.Host.AutoApi;
-
-public class ActionProps
-{
-    public bool Conventional = true;
-}
+namespace Boiler.Web.Host.AutoApi;
 
 public class ApiDescProvider: IApiDescriptionProvider
 {
@@ -45,17 +39,17 @@ public class AppServiceControllerConvention : IControllerModelConvention
         {
             // Apply [ApiController] and default route
             controller.Filters.Add(new ApiControllerAttribute());
+            var path = "api/";
+            var version = controller.Attributes.OfType<ApiVersionAttribute>().FirstOrDefault();
+            if (version != null)
+            {
+                path += $"v{version.VersionString}";
+            }
+            path += $"/{CreateRouteFromName(controller.ControllerName)}";
+            
             controller.Selectors.Add(new SelectorModel
             {
-                AttributeRouteModel = new AttributeRouteModel(
-                    // new RouteAttribute($"api/{controller.ControllerName.Replace("AppService", "").Replace("Service", "")}/[action]")
-                    new RouteAttribute($"api/{CreateRouteFromName(controller.ControllerName)}")
-                    {
-                        // Name = controller.ControllerName.Replace("AppService", "").Replace("Service", "")
-                    })
-                {
-                    // Name = controller.ControllerName.Replace("AppService", "").Replace("Service", "")
-                }
+                AttributeRouteModel = new AttributeRouteModel(new RouteAttribute(path))
             });
             // Inject controller properties from services
             foreach (var controllerControllerProperty in controller.ControllerProperties)

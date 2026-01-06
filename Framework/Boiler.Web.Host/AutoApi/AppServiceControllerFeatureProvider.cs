@@ -3,7 +3,7 @@ using Boiler.Core.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 
-namespace Infant.Host.AutoApi;
+namespace Boiler.Web.Host.AutoApi;
 
 public class AppServiceControllerFeatureProvider : ControllerFeatureProvider
 {

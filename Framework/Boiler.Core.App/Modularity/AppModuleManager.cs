@@ -9,6 +9,7 @@ using Castle.DynamicProxy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Serilog;
 
 // using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -28,7 +29,16 @@ public class AppModuleManager
     {
         _serviceCollection = serviceCollection;
         _rootAppModuleType = rootAppModuleType;
-        serviceCollection.GetSingletonInstance<ContainerBuilder>().RegisterInstance(this).As<AppModuleManager>();
+        try
+        {
+            var containerBuilder = serviceCollection.GetSingletonInstance<ContainerBuilder>();
+            containerBuilder.RegisterInstance(this).As<AppModuleManager>();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Probably didn't call AddApplicationAsync<TModule>() on WebApplicationBuilder");
+        }
+        
         var interceptors = serviceCollection.GetSingletonInstanceOrNull<WebApplicationSettings>()?.Interceptors;
         if (interceptors is not null)
         {

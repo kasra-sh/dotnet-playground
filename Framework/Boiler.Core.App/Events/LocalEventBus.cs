@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Boiler.Core.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Boiler.Core.Events;
 
@@ -14,6 +15,10 @@ internal class Subscription
     public Action<object> WrappedCallback { get; set; }
 }
 
+public interface IEventHandler<in T>: IDisposable where T : class
+{
+    Task HandleEventAsync(T eventObject);
+}
 public class LocalEventBus : ILocalEventBus
 {
     private ConcurrentQueue<object> _eventObjects = new ConcurrentQueue<object>();
@@ -21,7 +26,7 @@ public class LocalEventBus : ILocalEventBus
     private SemaphoreSlim _semaphoreSlim = new(1);
     private bool IsDisposed { get; set; }
 
-    public LocalEventBus()
+    public LocalEventBus(IServiceProvider serviceProvider)
     {
         Task.Factory.StartNew(async () =>
         {
@@ -42,7 +47,15 @@ public class LocalEventBus : ILocalEventBus
                 if (gotEvent && result != null)
                 {
                     var type = result.GetType();
-
+                    using var scope = serviceProvider.CreateAsyncScope();
+                    var genericType = typeof(IEventHandler<>).MakeGenericType(type);
+                    var handlers = scope.ServiceProvider.GetServices(genericType);
+                    foreach (var handler in handlers)
+                    {
+                        var method = genericType?.GetMethod("HandleEventAsync");
+                        method?.Invoke(handler, new[] { result });
+                    }
+                    
                     var subscriptions = _subscriptions[type];
 
                     foreach (var subscription in subscriptions)

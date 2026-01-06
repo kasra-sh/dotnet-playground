@@ -1,18 +1,13 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Autofac;
 using Boiler.Core.Modularity;
 using Boiler.Core.Modularity.Ioc;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
 // using Microsoft.AspNetCore.Builder;
 
-namespace Infant.Host;
+namespace Boiler.Web.Host;
 
 public static class WebApplicationExtensions
 {
@@ -78,7 +73,7 @@ public static class WebApplicationExtensions
         {
             // c.SwaggerDoc("v1", new Info { Title = "You api title", Version = "v1" });
 
-            c.AddSecurityDefinition("bearerAuth", new OpenApiSecurityScheme
+            c.AddSecurityDefinition("JWT Bearer Auth", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
                 Type = SecuritySchemeType.Http,
@@ -106,6 +101,7 @@ public static class WebApplicationExtensions
             {
                 var controllerName = apiDesc.ActionDescriptor.RouteValues["controller"];
                 var actionName = apiDesc.ActionDescriptor.RouteValues["action"];
+                // var methodNAme = apiDesc.ActionDescriptor.RouteValues["method"];
                 return $"{controllerName}_{actionName}";
             });
             c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());

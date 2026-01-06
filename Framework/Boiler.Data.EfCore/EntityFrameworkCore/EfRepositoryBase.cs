@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Boiler.Core.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Boiler.Core.EfCore.EntityFrameworkCore;
+namespace Boiler.Data.EfCore.EntityFrameworkCore;
 
 public abstract class EfRepositoryBase<T> where T : class, IEntity
 {

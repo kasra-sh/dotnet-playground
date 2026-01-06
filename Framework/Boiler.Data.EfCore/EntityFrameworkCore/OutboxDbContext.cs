@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace Boiler.Core.EfCore.EntityFrameworkCore;
+namespace Boiler.Data.EfCore.EntityFrameworkCore;
 
 public abstract class OutboxDbContext : DbContext
 {

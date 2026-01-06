@@ -1,10 +1,7 @@
-using System;
-using System.Linq;
 using Boiler.Core.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Infant.Host.AutoApi;
+namespace Boiler.Web.Host.AutoApi;
 
 public static class MvcBuilderExtensions
 {

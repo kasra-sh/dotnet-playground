@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Boiler.Core.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
-using Microsoft.AspNetCore.Routing;
 
-namespace Infant.Host.AutoApi;
+namespace Boiler.Web.Host.AutoApi;
 
 public class AppServiceActionConvention : IActionModelConvention
 {
@@ -25,7 +21,8 @@ public class AppServiceActionConvention : IActionModelConvention
             return;
         foreach (var parameter in action.Parameters)
         {
-            if (parameter.ParameterType.IsInterface || !parameter.ParameterType.IsClass || parameter.ParameterType.IsAbstract)
+            if (parameter.ParameterType.IsInterface || !parameter.ParameterType.IsClass ||
+                parameter.ParameterType.IsAbstract)
             {
                 parameter.BindingInfo = new BindingInfo
                 {
@@ -34,21 +31,23 @@ public class AppServiceActionConvention : IActionModelConvention
                 };
             }
         }
+
         var methodName = action.ActionMethod.Name;
         foreach (var (prefix, httpMethod) in HttpVerbAttributes)
         {
-            if (prefix.Any(p=> methodName.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
+            if (prefix.Any(p => methodName.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
             {
                 // Create the appropriate HTTP verb attribute
                 // Set the route template if needed
                 var routeSegment = ToKebabCase(methodName);
                 if (!string.IsNullOrEmpty(routeSegment))
                 {
-                    var httpVerbAttribute = (Attribute)Activator.CreateInstance(httpMethod.Item2, new object[] { routeSegment })!;
+                    var httpVerbAttribute =
+                        (Attribute)Activator.CreateInstance(httpMethod.Item2, new object[] { routeSegment })!;
                     ((List<object>)action.Attributes).Add(httpVerbAttribute);
                     action.RouteValues.Add("action", routeSegment);
                     action.RouteValues.Add("route", routeSegment);
-                    
+
                     action.Selectors[0].EndpointMetadata.Add(httpVerbAttribute);
                     action.Selectors[0].EndpointMetadata.Add(new HttpMethodMetadata([httpMethod.Item1]));
                     action.Selectors[0].AttributeRouteModel = new AttributeRouteModel

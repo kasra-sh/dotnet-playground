@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
 using Boiler.Core.Domain;
 using Boiler.Core.Domain.Entity;
 using Boiler.Core.Domain.Shared;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
 
-namespace Boiler.Core.EfCore.EntityFrameworkCore;
+namespace Boiler.Data.EfCore.EntityFrameworkCore;
 
 public abstract class EfCrudRepository<T, TKey> : EfRepositoryBase<T>, IEfCrudRepository<T, TKey> where T : class, IEntity<TKey>
 {
